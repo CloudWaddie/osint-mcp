@@ -9,7 +9,7 @@ import { z } from "zod";
 // Import API clients
 import { IpApiClient } from "./tools/ip-geolocation.js";
 import { RdapApiClient } from "./tools/whois.js";
-import { RobtexApiClient } from "./tools/dns.js";
+import { RobtexApiClient } from "./tools/robtex.js";
 import { HibpApiClient } from "./tools/hibp.js";
 import { ShodanApiClient } from "./tools/shodan.js";
 import { ExaApiClient } from "./tools/exa.js";
@@ -31,6 +31,7 @@ import { FandomApiClient } from "./tools/fandom.js";
 import { ArchiveApiClient } from "./tools/archive.js";
 import { MacAddressApiClient } from "./tools/mac.js";
 import { KeybaseApiClient } from "./tools/keybase.js";
+import { DirectDnsClient } from "./tools/dns.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -40,7 +41,7 @@ const server = new McpServer({
 // Initialize API clients
 const ipClient = new IpApiClient();
 const whoisClient = new RdapApiClient();
-const dnsClient = new RobtexApiClient();
+const robtexClient = new RobtexApiClient();
 const hibpClient = new HibpApiClient();
 const shodanClient = new ShodanApiClient();
 const exaClient = new ExaApiClient();
@@ -62,6 +63,7 @@ const fandomClient = new FandomApiClient();
 const archiveClient = new ArchiveApiClient();
 const macClient = new MacAddressApiClient();
 const keybaseClient = new KeybaseApiClient();
+const directDnsClient = new DirectDnsClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -89,10 +91,35 @@ server.tool(
 
 // --- DNS ---
 server.tool(
-  "dns_lookup",
-  { domain: z.string().describe("Domain name to lookup DNS records") },
+  "dns_lookup_passive",
+  { domain: z.string().describe("Domain name to lookup passive DNS records from Robtex") },
   async ({ domain }) => {
-    const result = await dnsClient.getDns(domain);
+    const result = await robtexClient.getDns(domain);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "dns_lookup_direct",
+  {
+    domain: z.string().describe("Domain name to lookup"),
+    type: z.enum(["A", "AAAA", "MX", "TXT", "NS", "CNAME", "SOA"]).describe("Record type"),
+  },
+  async ({ domain, type }) => {
+    const result = await directDnsClient.lookup(domain, type);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "reverse_dns",
+  { ip: z.string().describe("IP address to lookup hostname for") },
+  async ({ ip }) => {
+    const result = await directDnsClient.reverse(ip);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };

@@ -1,38 +1,31 @@
 import { BaseApiClient } from "../lib/api-client.js";
-import { DnsResult, DnsResultSchema } from "../types/index.js";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
+import dns from "node:dns/promises";
 
-export class RobtexApiClient extends BaseApiClient {
-  protected baseUrl = "https://freeapi.robtex.com/";
-
-  constructor() {
-    // Robtex free tier limits are not strictly documented but let's be safe
-    super(60);
+export class DirectDnsClient {
+  async lookup(domain: string, type: "A" | "AAAA" | "MX" | "TXT" | "NS" | "CNAME" | "SOA" | "PTR"): Promise<any> {
+    try {
+      switch (type) {
+        case "A": return await dns.resolve4(domain);
+        case "AAAA": return await dns.resolve6(domain);
+        case "MX": return await dns.resolveMx(domain);
+        case "TXT": return await dns.resolveTxt(domain);
+        case "NS": return await dns.resolveNs(domain);
+        case "CNAME": return await dns.resolveCname(domain);
+        case "SOA": return await dns.resolveSoa(domain);
+        default: throw new Error(`Unsupported record type: ${type}`);
+      }
+    } catch (error) {
+      throw new McpError(ErrorCode.InternalError, `DNS Lookup failed: ${(error as Error).message}`);
+    }
   }
 
-  async getDns(domain: string): Promise<DnsResult> {
+  async reverse(ip: string): Promise<string[]> {
     try {
-      const data = await this.fetch<any>(`pdns/forward/${domain}`, {
-        method: "GET",
-      });
-
-      // Robtex returns a list of records in JSON lines format or array
-      // Actually it's an array of objects
-      const records = data.map((r: any) => ({
-        type: r.rrtype,
-        value: r.rrdata,
-      }));
-
-      return DnsResultSchema.parse({
-        domain,
-        records,
-      });
+      return await dns.reverse(ip);
     } catch (error) {
-      if (error instanceof McpError) throw error;
-      throw new McpError(
-        ErrorCode.InternalError,
-        `Robtex DNS error: ${(error as Error).message}`
-      );
+       throw new McpError(ErrorCode.InternalError, `Reverse DNS failed: ${(error as Error).message}`);
     }
   }
 }
