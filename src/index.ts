@@ -25,6 +25,9 @@ import { ZoomEyeApiClient } from "./tools/zoomeye.js";
 import { SauceNaoApiClient } from "./tools/saucenao.js";
 import { ImaggaApiClient } from "./tools/imagga.js";
 import { GoogleVisionApiClient } from "./tools/googlevision.js";
+import { GithubApiClient } from "./tools/github.js";
+import { UsernameSearchClient } from "./tools/usernames.js";
+import { FandomApiClient } from "./tools/fandom.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -50,6 +53,9 @@ const zeClient = new ZoomEyeApiClient();
 const snClient = new SauceNaoApiClient();
 const imClient = new ImaggaApiClient();
 const gvClient = new GoogleVisionApiClient();
+const ghClient = new GithubApiClient();
+const userClient = new UsernameSearchClient();
+const fandomClient = new FandomApiClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -263,6 +269,78 @@ server.tool(
   { url: z.string().url().describe("Image URL to analyze with Google Vision API") },
   async ({ url }) => {
     const result = await gvClient.annotateImage(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- GitHub ---
+server.tool(
+  "github_user_info",
+  { username: z.string().describe("GitHub username") },
+  async ({ username }) => {
+    const result = await ghClient.getUserInfo(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "github_user_repos",
+  { username: z.string().describe("GitHub username") },
+  async ({ username }) => {
+    const result = await ghClient.getUserRepos(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "github_commit_emails",
+  { username: z.string().describe("GitHub username") },
+  async ({ username }) => {
+    const result = await ghClient.getCommitEmails(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Username Search ---
+server.tool(
+  "username_search",
+  { username: z.string().describe("Username to search for across platforms") },
+  async ({ username }) => {
+    const result = await userClient.search(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Fandom ---
+server.tool(
+  "fandom_user_info",
+  { username: z.string().describe("Fandom username") },
+  async ({ username }) => {
+    const result = await fandomClient.getUserInfo(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "fandom_user_contributions",
+  { 
+    username: z.string().describe("Fandom username"),
+    limit: z.number().optional().default(50).describe("Number of contributions to return"),
+  },
+  async ({ username, limit }) => {
+    const result = await fandomClient.getUserContributions(username, limit);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
