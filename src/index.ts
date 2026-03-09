@@ -42,6 +42,10 @@ import { SocialAccountClient } from "./tools/social-accounts.js";
 import { CryptoApiClient } from "./tools/crypto.js";
 import { PhoneApiClient } from "./tools/phone.js";
 import { ExifApiClient } from "./tools/exif.js";
+import { GamingApiClient } from "./tools/gaming.js";
+import { ThreatIntelClient } from "./tools/threat.js";
+import { NetworkAdvClient } from "./tools/network-adv.js";
+import { CorporateApiClient } from "./tools/corporate.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -84,6 +88,10 @@ const emailSocialClient = new SocialAccountClient();
 const cryptoClient = new CryptoApiClient();
 const phoneClient = new PhoneApiClient();
 const exifClient = new ExifApiClient();
+const gamingClient = new GamingApiClient();
+const threatClient = new ThreatIntelClient();
+const netAdvClient = new NetworkAdvClient();
+const corpClient = new CorporateApiClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -587,6 +595,131 @@ server.tool(
   { url: z.string().url().describe("Image URL to extract EXIF data from") },
   async ({ url }) => {
     const result = await exifClient.getMetadata(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Gaming ---
+server.tool(
+  "discord_lookup",
+  { userId: z.string().describe("Discord User ID to lookup") },
+  async ({ userId }) => {
+    const result = await gamingClient.discordLookup(userId);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "steam_lookup",
+  { steamId: z.string().describe("Steam ID to lookup (64-bit ID)") },
+  async ({ steamId }) => {
+    const result = await gamingClient.steamLookup(steamId);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "xbox_lookup",
+  { gamertag: z.string().describe("Xbox Gamertag to lookup") },
+  async ({ gamertag }) => {
+    const result = await gamingClient.xboxLookup(gamertag);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Threat Intel ---
+server.tool(
+  "hash_lookup",
+  { hash: z.string().describe("MD5/SHA1/SHA256 hash to lookup in MalwareBazaar") },
+  async ({ hash }) => {
+    const result = await threatClient.lookupHash(hash);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "tor_check",
+  { ip: z.string().describe("IP address to check for Tor node status") },
+  async ({ ip }) => {
+    const result = await threatClient.isTorNode(ip);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "paste_search",
+  { query: z.string().describe("Query to search for in public pastes") },
+  async ({ query }) => {
+    const result = await threatClient.searchPastes(query);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Advanced Network ---
+server.tool(
+  "asn_lookup",
+  { asn: z.string().describe("ASN string (e.g., '15169') to lookup") },
+  async ({ asn }) => {
+    const result = await netAdvClient.lookupAsn(asn);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "unshorten_url",
+  { url: z.string().url().describe("Shortened URL to expand") },
+  async ({ url }) => {
+    const result = await netAdvClient.unshorten(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "quick_port_scan",
+  { ip: z.string().describe("IP address to perform a quick port scan on") },
+  async ({ ip }) => {
+    const result = await netAdvClient.scanPorts(ip);
+    return {
+      content: [{ type: "text", text: result }],
+    };
+  }
+);
+
+// --- Corporate & PGP ---
+server.tool(
+  "opencorporates_search",
+  { query: z.string().describe("Company name to search for in OpenCorporates") },
+  async ({ query }) => {
+    const result = await corpClient.searchCompanies(query);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "pgp_search",
+  { query: z.string().describe("Email or name to search for in PGP keyservers") },
+  async ({ query }) => {
+    const result = await corpClient.searchPgp(query);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
