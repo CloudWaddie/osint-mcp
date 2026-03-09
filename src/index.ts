@@ -32,6 +32,10 @@ import { ArchiveApiClient } from "./tools/archive.js";
 import { MacAddressApiClient } from "./tools/mac.js";
 import { KeybaseApiClient } from "./tools/keybase.js";
 import { DirectDnsClient } from "./tools/dns.js";
+import { SocialScraperClient } from "./tools/social.js";
+import { TechDetectorClient } from "./tools/tech.js";
+import { RedditApiClient } from "./tools/reddit.js";
+import { WhoisXmlApiClient } from "./tools/whoishistory.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -64,6 +68,10 @@ const archiveClient = new ArchiveApiClient();
 const macClient = new MacAddressApiClient();
 const keybaseClient = new KeybaseApiClient();
 const directDnsClient = new DirectDnsClient();
+const socialClient = new SocialScraperClient();
+const techClient = new TechDetectorClient();
+const redditClient = new RedditApiClient();
+const whoisHistoryClient = new WhoisXmlApiClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -83,6 +91,17 @@ server.tool(
   { domain: z.string().describe("Domain name to lookup WHOIS information") },
   async ({ domain }) => {
     const result = await whoisClient.getWhois(domain);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "whois_history",
+  { domain: z.string().describe("Domain name to lookup WHOIS history (Requires WHOISXML_API_KEY)") },
+  async ({ domain }) => {
+    const result = await whoisHistoryClient.getHistory(domain);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
@@ -410,6 +429,55 @@ server.tool(
   { username: z.string().describe("Keybase username to lookup") },
   async ({ username }) => {
     const result = await keybaseClient.lookup(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Reddit ---
+server.tool(
+  "reddit_user_details",
+  { username: z.string().describe("Reddit username") },
+  async ({ username }) => {
+    const result = await redditClient.getUserDetails(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "reddit_user_posts",
+  {
+    username: z.string().describe("Reddit username"),
+    limit: z.number().optional().default(25).describe("Number of posts to return"),
+  },
+  async ({ username, limit }) => {
+    const result = await redditClient.getUserPosts(username, limit);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Social & Tech ---
+server.tool(
+  "url_metadata",
+  { url: z.string().url().describe("URL to scrape metadata from") },
+  async ({ url }) => {
+    const result = await socialClient.scrapeMetadata(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "url_tech_stack",
+  { url: z.string().url().describe("URL to detect technology stack for") },
+  async ({ url }) => {
+    const result = await techClient.detect(url);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
