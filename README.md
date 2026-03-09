@@ -6,10 +6,11 @@ A comprehensive Model Context Protocol (MCP) server providing a wide range of OS
 
 - **IP Intelligence**: Geolocation (ip-api.com), Shodan, GreyNoise, AlienVault OTX, MAC Address Lookup
 - **Domain Intelligence**: WHOIS (RDAP, Shodan, History), DNS (Robtex, HackerTarget, Direct), SSL Certificates (crt.sh), Subdomain Enumeration, Wayback Machine (Archive.org)
-- **Social & Identity**: GitHub (Profile, Repos, Commit Emails), Reddit (Profile, Posts), Fandom (Profile, Contributions), Username Search (20+ platforms), Keybase Lookup
-- **Web Intelligence**: Technology Stack Detection, Social Metadata Scraping, Wayback Machine, Exa Search, VirusTotal
-- **Email OSINT**: HaveIBeenPwned breach checking, Hunter.io domain search
-- **Image OSINT**: Reverse Image Search (SauceNAO), Image Tagging (Imagga), Visual Analysis (Google Vision)
+- **Social & Identity**: GitHub (Profile, Repos, Commit Emails, Repo Commits), Reddit (Profile, Posts), Fandom (Profile, Contributions), Username Search (20+ platforms), Keybase Lookup
+- **Web Intelligence**: Technology Stack Detection, Social Metadata Scraping, Wayback Machine, Exa Search, VirusTotal, EXIF Metadata Extraction
+- **Email OSINT**: HaveIBeenPwned, Hunter.io, Email Permutator, Domain Email Search, Social Profile Check (Gravatar)
+- **Crypto & Phone**: Bitcoin/Ethereum Wallet Lookup, Phone Number Intelligence
+- **Image OSINT**: Reverse Image Search (SauceNAO), Image Tagging (Imagga), Visual Analysis (Google Vision), EXIF Metadata
 
 ## Prerequisites
 
@@ -51,6 +52,7 @@ You can configure API keys using environment variables or a `config.json` file i
   "GOOGLE_CLOUD_API_KEY": "your_google_key",
   "GITHUB_TOKEN": "your_github_pat",
   "WHOISXML_API_KEY": "your_whoisxml_key",
+  "ABSTRACT_PHONE_API_KEY": "your_abstract_key",
   "PORT": 3000,
   "HOST": "0.0.0.0"
 }
@@ -77,7 +79,7 @@ The server will be available at `http://localhost:3000/mcp`.
 |-----------|-------------|
 | `ip_geolocation` | Get geolocation data for an IP address |
 | `whois_lookup` | Perform RDAP WHOIS lookup for a domain |
-| `whois_history` | Lookup WHOIS history for a domain (Requires WHOISXML_API_KEY) |
+| `whois_history` | Lookup WHOIS history for a domain |
 | `dns_lookup_passive` | Get passive DNS records from Robtex |
 | `dns_lookup_direct` | Real-time DNS lookup (A, MX, TXT, etc.) |
 | `reverse_dns` | Lookup hostname for an IP address |
@@ -98,17 +100,25 @@ The server will be available at `http://localhost:3000/mcp`.
 | `google_vision_analyze` | Analyze images with Google Vision |
 | `github_user_info` | Get detailed GitHub user metadata |
 | `github_user_repos` | List public GitHub repositories for a user |
-| `github_commit_emails` | Extract email addresses from public GitHub commits |
-| `username_search` | Search for a username across 20+ major platforms |
+| `github_commit_emails` | Extract email addresses from public events |
+| `github_repo_commits` | Scan a specific repo for commit emails |
+| `username_search` | Search for a username across 20+ platforms |
 | `fandom_user_info` | Get Fandom/Wiki user data |
 | `fandom_user_contributions` | List recent Fandom wiki contributions |
-| `archive_org_snapshot` | Check for Wayback Machine snapshots of a URL |
-| `mac_lookup` | Lookup vendor information for a MAC address |
+| `archive_org_snapshot` | Check for Wayback Machine snapshots |
+| `mac_lookup` | Lookup vendor for a MAC address |
 | `keybase_lookup` | Lookup Keybase identity and linked accounts |
 | `reddit_user_details` | Get basic Reddit user profile info |
 | `reddit_user_posts` | List recent Reddit posts for a user |
 | `url_metadata` | Scrape OpenGraph and meta tags from a URL |
 | `url_tech_stack` | Detect technologies used on a website |
+| `email_permutator` | Generate possible email address combinations |
+| `domain_email_search` | Search for emails associated with a domain |
+| `email_social_check` | Find social profiles linked to an email |
+| `btc_lookup` | Check Bitcoin address balance and transactions |
+| `eth_lookup` | Check Ethereum address balance |
+| `phone_lookup` | Lookup phone number carrier and location |
+| `exif_metadata` | Extract EXIF data from an image URL |
 | `web_search` | Perform web search via Exa |
 
 ## License

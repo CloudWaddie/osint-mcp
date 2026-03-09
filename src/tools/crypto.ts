@@ -13,7 +13,7 @@ export class CryptoApiClient extends BaseApiClient {
     try {
       const response = await fetch(`https://blockchain.info/rawaddr/${address}`);
       if (!response.ok) throw new Error("BTC Address not found or API error");
-      const data = await response.json();
+      const data = await response.json() as any;
       
       return {
         address: data.address,
@@ -37,7 +37,7 @@ export class CryptoApiClient extends BaseApiClient {
       // Using BlockCypher for ETH (free tier)
       const response = await fetch(`https://api.blockcypher.com/v1/eth/main/addrs/${address}/balance`);
       if (!response.ok) throw new Error("ETH Address not found or API error");
-      const data = await response.json();
+      const data = await response.json() as any;
 
       return {
         address: data.address,
