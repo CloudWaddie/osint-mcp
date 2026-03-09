@@ -46,6 +46,7 @@ import { GamingApiClient } from "./tools/gaming.js";
 import { ThreatIntelClient } from "./tools/threat.js";
 import { NetworkAdvClient } from "./tools/network-adv.js";
 import { CorporateApiClient } from "./tools/corporate.js";
+import { SocialScavengerClient } from "./tools/social-scavenger.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -92,6 +93,7 @@ const gamingClient = new GamingApiClient();
 const threatClient = new ThreatIntelClient();
 const netAdvClient = new NetworkAdvClient();
 const corpClient = new CorporateApiClient();
+const scavengerClient = new SocialScavengerClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -720,6 +722,29 @@ server.tool(
   { query: z.string().describe("Email or name to search for in PGP keyservers") },
   async ({ query }) => {
     const result = await corpClient.searchPgp(query);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Social Scavenger ---
+server.tool(
+  "twitter_user_search",
+  { username: z.string().describe("Twitter/X username to lookup") },
+  async ({ username }) => {
+    const result = await scavengerClient.getTwitterProfile(username);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "instagram_user_lookup",
+  { username: z.string().describe("Instagram username to lookup") },
+  async ({ username }) => {
+    const result = await scavengerClient.getInstagramProfile(username);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
