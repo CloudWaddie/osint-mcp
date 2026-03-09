@@ -75,4 +75,30 @@ export class GithubApiClient extends BaseApiClient {
       throw new McpError(ErrorCode.InternalError, `GitHub Commit Emails error: ${(error as Error).message}`);
     }
   }
+
+  async getRepoCommits(owner: string, repo: string): Promise<string[]> {
+    try {
+      const commits = await this.fetch<any[]>(`repos/${owner}/${repo}/commits`, {
+        method: "GET",
+        headers: this.getHeaders(),
+      }, {
+        per_page: 50
+      });
+
+      const emails = new Set<string>();
+      commits.forEach((c: any) => {
+        if (c.commit?.author?.email && !c.commit.author.email.includes("noreply")) {
+          emails.add(c.commit.author.email);
+        }
+        if (c.commit?.committer?.email && !c.commit.committer.email.includes("noreply")) {
+          emails.add(c.commit.committer.email);
+        }
+      });
+
+      return Array.from(emails);
+    } catch (error) {
+      if (error instanceof McpError) throw error;
+      throw new McpError(ErrorCode.InternalError, `GitHub Repo Commits error: ${(error as Error).message}`);
+    }
+  }
 }

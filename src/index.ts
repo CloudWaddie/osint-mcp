@@ -36,6 +36,12 @@ import { SocialScraperClient } from "./tools/social.js";
 import { TechDetectorClient } from "./tools/tech.js";
 import { RedditApiClient } from "./tools/reddit.js";
 import { WhoisXmlApiClient } from "./tools/whoishistory.js";
+import { EmailOsintClient } from "./tools/email-osint.js";
+import { EmailSearchClient } from "./tools/email-search.js";
+import { SocialAccountClient } from "./tools/social-accounts.js";
+import { CryptoApiClient } from "./tools/crypto.js";
+import { PhoneApiClient } from "./tools/phone.js";
+import { ExifApiClient } from "./tools/exif.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -72,6 +78,12 @@ const socialClient = new SocialScraperClient();
 const techClient = new TechDetectorClient();
 const redditClient = new RedditApiClient();
 const whoisHistoryClient = new WhoisXmlApiClient();
+const emailOsintClient = new EmailOsintClient();
+const emailSearchClient = new EmailSearchClient();
+const emailSocialClient = new SocialAccountClient();
+const cryptoClient = new CryptoApiClient();
+const phoneClient = new PhoneApiClient();
+const exifClient = new ExifApiClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -361,6 +373,20 @@ server.tool(
   }
 );
 
+server.tool(
+  "github_repo_commits",
+  {
+    owner: z.string().describe("Repository owner"),
+    repo: z.string().describe("Repository name"),
+  },
+  async ({ owner, repo }) => {
+    const result = await ghClient.getRepoCommits(owner, repo);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
 // --- Username Search ---
 server.tool(
   "username_search",
@@ -478,6 +504,89 @@ server.tool(
   { url: z.string().url().describe("URL to detect technology stack for") },
   async ({ url }) => {
     const result = await techClient.detect(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Email OSINT ---
+server.tool(
+  "email_permutator",
+  {
+    firstName: z.string().describe("First name"),
+    lastName: z.string().describe("Last name"),
+    domain: z.string().describe("Domain (e.g., example.com)"),
+  },
+  async ({ firstName, lastName, domain }) => {
+    const result = emailOsintClient.generatePermutations(firstName, lastName, domain);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "domain_email_search",
+  { domain: z.string().describe("Domain to search for associated emails") },
+  async ({ domain }) => {
+    const result = await emailSearchClient.searchDomain(domain);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "email_social_check",
+  { email: z.string().email().describe("Email to check for social profiles") },
+  async ({ email }) => {
+    const result = await emailSocialClient.checkEmail(email);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Crypto & Phone & EXIF ---
+server.tool(
+  "btc_lookup",
+  { address: z.string().describe("Bitcoin address to lookup") },
+  async ({ address }) => {
+    const result = await cryptoClient.lookupBtc(address);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "eth_lookup",
+  { address: z.string().describe("Ethereum address to lookup") },
+  async ({ address }) => {
+    const result = await cryptoClient.lookupEth(address);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "phone_lookup",
+  { number: z.string().describe("Phone number to lookup (include country code)") },
+  async ({ number }) => {
+    const result = await phoneClient.lookup(number);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "exif_metadata",
+  { url: z.string().url().describe("Image URL to extract EXIF data from") },
+  async ({ url }) => {
+    const result = await exifClient.getMetadata(url);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
