@@ -4,8 +4,9 @@ A comprehensive Model Context Protocol (MCP) server providing a wide range of OS
 
 ## Features
 
-- **IP Intelligence**: Geolocation (ip-api.com), Shodan, GreyNoise, OTX
-- **Domain Intelligence**: WHOIS (RDAP, Shodan), DNS (Robtex, HackerTarget), SSL Certificates (crt.sh), Subdomain Enumeration
+- **IP Intelligence**: Geolocation (ip-api.com), Shodan, GreyNoise, AlienVault OTX, MAC Address Lookup
+- **Domain Intelligence**: WHOIS (RDAP, Shodan), DNS (Robtex, HackerTarget), SSL Certificates (crt.sh), Subdomain Enumeration, Wayback Machine (Archive.org)
+- **Social & Identity**: GitHub (Profile, Repos, Commit Emails), Fandom (Profile, Contributions), Username Search (20+ platforms), Keybase Lookup
 - **Email OSINT**: HaveIBeenPwned breach checking, Hunter.io domain search
 - **Search**: Exa Web Search, ZoomEye
 - **Image OSINT**: Reverse Image Search (SauceNAO), Image Tagging (Imagga), Visual Analysis (Google Vision)
@@ -48,6 +49,7 @@ You can configure API keys using environment variables or a `config.json` file i
   "IMAGGA_API_KEY": "your_imagga_key",
   "IMAGGA_API_SECRET": "your_imagga_secret",
   "GOOGLE_CLOUD_API_KEY": "your_google_key",
+  "GITHUB_TOKEN": "your_github_pat",
   "PORT": 3000,
   "HOST": "0.0.0.0"
 }
@@ -90,6 +92,15 @@ The server will be available at `http://localhost:3000/mcp`.
 | `reverse_image_search_anime` | Search anime/art images on SauceNAO |
 | `image_tagging` | Tag and categorize images with Imagga |
 | `google_vision_analyze` | Analyze images with Google Vision |
+| `github_user_info` | Get detailed GitHub user metadata |
+| `github_user_repos` | List public GitHub repositories for a user |
+| `github_commit_emails` | Extract email addresses from public GitHub commits |
+| `username_search` | Search for a username across 20+ major platforms |
+| `fandom_user_info` | Get Fandom/Wiki user data |
+| `fandom_user_contributions` | List recent Fandom wiki contributions |
+| `archive_org_snapshot` | Check for Wayback Machine snapshots of a URL |
+| `mac_lookup` | Lookup vendor information for a MAC address |
+| `keybase_lookup` | Lookup Keybase identity and linked accounts |
 | `web_search` | Perform web search via Exa |
 
 ## License
