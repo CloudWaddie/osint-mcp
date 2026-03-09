@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "osint-mcp": {
+      "command": "node",
+      "args": [
+        "D:\\_edward\\projects\\osint-mcp\\dist\\index.js",
+        "--stdio"
+      ]
+    }
+  }
+}

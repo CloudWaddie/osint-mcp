@@ -1,0 +1,97 @@
+# OSINT MCP Server
+
+A comprehensive Model Context Protocol (MCP) server providing a wide range of OSINT (Open Source Intelligence) tools.
+
+## Features
+
+- **IP Intelligence**: Geolocation (ip-api.com), Shodan, GreyNoise, OTX
+- **Domain Intelligence**: WHOIS (RDAP, Shodan), DNS (Robtex, HackerTarget), SSL Certificates (crt.sh), Subdomain Enumeration
+- **Email OSINT**: HaveIBeenPwned breach checking, Hunter.io domain search
+- **Search**: Exa Web Search, ZoomEye
+- **Image OSINT**: Reverse Image Search (SauceNAO), Image Tagging (Imagga), Visual Analysis (Google Vision)
+
+## Prerequisites
+
+- Node.js 20+
+- API Keys for various services (optional but recommended for full functionality)
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Build the project:
+   ```bash
+   npm run build
+   ```
+
+## Configuration
+
+You can configure API keys using environment variables or a `config.json` file in the root directory.
+
+### Example `config.json`
+
+```json
+{
+  "SHODAN_API_KEY": "your_shodan_key",
+  "HIBP_API_KEY": "your_hibp_key",
+  "EXA_API_KEY": "your_exa_key",
+  "VIRUSTOTAL_API_KEY": "your_vt_key",
+  "HUNTER_API_KEY": "your_hunter_key",
+  "GREYNOISE_API_KEY": "your_greynoise_key",
+  "ALIENVAULT_API_KEY": "your_otx_key",
+  "SECURITYTRAILS_API_KEY": "your_st_key",
+  "ZOOMEYE_API_KEY": "your_zoomeye_key",
+  "SAUCENAO_API_KEY": "your_saucenao_key",
+  "IMAGGA_API_KEY": "your_imagga_key",
+  "IMAGGA_API_SECRET": "your_imagga_secret",
+  "GOOGLE_CLOUD_API_KEY": "your_google_key",
+  "PORT": 3000,
+  "HOST": "0.0.0.0"
+}
+```
+
+## Usage
+
+### Stdio Transport (Default for many MCP clients)
+
+```bash
+node dist/index.js --stdio
+```
+
+### HTTP Transport
+
+```bash
+npm start
+```
+The server will be available at `http://localhost:3000/mcp`.
+
+## Tools
+
+| Tool Name | Description |
+|-----------|-------------|
+| `ip_geolocation` | Get geolocation data for an IP address |
+| `whois_lookup` | Perform RDAP WHOIS lookup for a domain |
+| `dns_lookup` | Get passive DNS records from Robtex |
+| `check_breaches` | Check if an email has been compromised (HIBP) |
+| `shodan_host` | Get host details from Shodan |
+| `shodan_whois` | Perform WHOIS lookup via Shodan Labs |
+| `ssl_certs` | Lookup SSL certificates on crt.sh |
+| `url_reputation` | Check URL reputation on VirusTotal |
+| `dns_enumeration` | Perform DNS enumeration via HackerTarget |
+| `subdomain_enum` | Find subdomains using multiple sources |
+| `hunter_domain_search` | Search for email addresses on a domain |
+| `greynoise_ip_context` | Get IP context from GreyNoise |
+| `otx_indicator_details` | Get threat intel from AlienVault OTX |
+| `securitytrails_subdomains` | Find subdomains via SecurityTrails |
+| `zoomeye_host_search` | Search hosts on ZoomEye |
+| `reverse_image_search_anime` | Search anime/art images on SauceNAO |
+| `image_tagging` | Tag and categorize images with Imagga |
+| `google_vision_analyze` | Analyze images with Google Vision |
+| `web_search` | Perform web search via Exa |
+
+## License
+
+MIT
