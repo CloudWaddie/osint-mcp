@@ -28,6 +28,9 @@ import { GoogleVisionApiClient } from "./tools/googlevision.js";
 import { GithubApiClient } from "./tools/github.js";
 import { UsernameSearchClient } from "./tools/usernames.js";
 import { FandomApiClient } from "./tools/fandom.js";
+import { ArchiveApiClient } from "./tools/archive.js";
+import { MacAddressApiClient } from "./tools/mac.js";
+import { KeybaseApiClient } from "./tools/keybase.js";
 
 const server = new McpServer({
   name: "osint-mcp",
@@ -56,6 +59,9 @@ const gvClient = new GoogleVisionApiClient();
 const ghClient = new GithubApiClient();
 const userClient = new UsernameSearchClient();
 const fandomClient = new FandomApiClient();
+const archiveClient = new ArchiveApiClient();
+const macClient = new MacAddressApiClient();
+const keybaseClient = new KeybaseApiClient();
 
 // --- IP Geolocation ---
 server.tool(
@@ -341,6 +347,42 @@ server.tool(
   },
   async ({ username, limit }) => {
     const result = await fandomClient.getUserContributions(username, limit);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- Wayback Machine ---
+server.tool(
+  "archive_org_snapshot",
+  { url: z.string().url().describe("URL to check for Wayback Machine snapshots") },
+  async ({ url }) => {
+    const result = await archiveClient.getLatestSnapshot(url);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// --- MAC Address ---
+server.tool(
+  "mac_lookup",
+  { mac: z.string().describe("MAC address to lookup vendor for") },
+  async ({ mac }) => {
+    const result = await macClient.getVendor(mac);
+    return {
+      content: [{ type: "text", text: result }],
+    };
+  }
+);
+
+// --- Keybase ---
+server.tool(
+  "keybase_lookup",
+  { username: z.string().describe("Keybase username to lookup") },
+  async ({ username }) => {
+    const result = await keybaseClient.lookup(username);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
